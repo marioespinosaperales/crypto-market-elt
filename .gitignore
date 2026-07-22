@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Data & warehouse: NUNCA se commitean (viven en object storage / DuckDB local)
+data/
+warehouse/
+logs/
+*.duckdb
+*.duckdb.wal
+# Única excepción: snapshot de marts que Evidence necesita en build time (Vercel)
+!dashboard/sources/crypto/crypto_marts.duckdb
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/.user.yml
+
+# Dagster
+.dagster_home/
+tmp*/
+
+# Secrets
+.env
+
+# OS / editor
+.DS_Store
+Thumbs.db

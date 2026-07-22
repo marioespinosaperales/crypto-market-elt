@@ -1,0 +1,24 @@
+{
+  "dataset": "raw.binance_klines",
+  "layer": "raw",
+  "grain": "una fila por (symbol, open_time, ingested_date); solo velas cerradas",
+  "source": "GET /api/v3/klines (Binance spot, respuesta posicional)",
+  "validated_by": "src/crypto_market_elt/validate/frames.py::binance_klines_schema",
+  "columns": {
+    "open_time_ms": {"type": "int64", "nullable": false, "checks": "> 0"},
+    "open": {"type": "double", "nullable": false, "checks": "> 0"},
+    "high": {"type": "double", "nullable": false, "checks": "> 0, >= low"},
+    "low": {"type": "double", "nullable": false, "checks": "> 0"},
+    "close": {"type": "double", "nullable": false, "checks": "> 0"},
+    "volume": {"type": "double", "nullable": false, "checks": ">= 0"},
+    "close_time_ms": {"type": "int64", "nullable": false, "checks": "> 0, vela cerrada"},
+    "quote_volume": {"type": "double", "nullable": false, "checks": ">= 0"},
+    "trade_count": {"type": "int64", "nullable": false, "checks": ">= 0"},
+    "taker_buy_base_volume": {"type": "double", "nullable": false, "checks": ">= 0"},
+    "taker_buy_quote_volume": {"type": "double", "nullable": false, "checks": ">= 0"},
+    "open_time": {"type": "timestamp_utc", "nullable": false},
+    "symbol": {"type": "string", "nullable": false},
+    "interval": {"type": "string", "nullable": false},
+    "ingested_date": {"type": "date", "nullable": false, "notes": "derivada de la particion Hive"}
+  }
+}

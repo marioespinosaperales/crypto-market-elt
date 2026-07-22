@@ -1,0 +1,22 @@
+{
+  "dataset": "raw.coingecko_markets",
+  "layer": "raw",
+  "grain": "una fila por (coin_id, snapshot_date, ingested_date)",
+  "source": "GET /coins/markets (CoinGecko v3)",
+  "validated_by": "src/crypto_market_elt/validate/frames.py::coingecko_markets_schema",
+  "columns": {
+    "coin_id": {"type": "string", "nullable": false, "notes": "id canonico de CoinGecko"},
+    "symbol": {"type": "string", "nullable": false},
+    "name": {"type": "string", "nullable": false},
+    "current_price": {"type": "double", "nullable": false, "checks": "> 0"},
+    "market_cap": {"type": "double", "nullable": true, "checks": ">= 0"},
+    "market_cap_rank": {"type": "double", "nullable": true, "checks": ">= 1"},
+    "total_volume": {"type": "double", "nullable": true, "checks": ">= 0"},
+    "price_change_percentage_24h": {"type": "double", "nullable": true},
+    "circulating_supply": {"type": "double", "nullable": true, "checks": ">= 0"},
+    "last_updated": {"type": "string", "nullable": false, "notes": "ISO-8601 de la fuente"},
+    "vs_currency": {"type": "string", "nullable": false},
+    "snapshot_date": {"type": "timestamp", "nullable": false},
+    "ingested_date": {"type": "date", "nullable": false, "notes": "derivada de la particion Hive"}
+  }
+}

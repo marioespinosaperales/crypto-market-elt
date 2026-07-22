@@ -1,0 +1,22 @@
+# Parámetros de las fuentes de datos. Secretos NUNCA aquí: van en .env / env vars.
+coingecko:
+  base_url: https://api.coingecko.com/api/v3
+  vs_currency: usd
+  top_n: 100            # top N monedas por market cap
+  timeout_seconds: 30
+  max_retries: 3
+  backoff_seconds: 2.0  # backoff exponencial: 2, 4, 8...
+
+binance:
+  base_url: https://api.binance.com
+  interval: 1d
+  lookback_days: 365
+  timeout_seconds: 30
+  max_retries: 3
+  backoff_seconds: 2.0
+  symbols:
+    - BTCUSDT
+    - ETHUSDT
+    - SOLUSDT
+    - BNBUSDT
+    - XRPUSDT

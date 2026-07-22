@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: mart_daily_ohlcv
+    description: Retornos diarios, volatilidad rolling y volumen por símbolo.
+    columns:
+      - name: close
+        data_tests: [not_null, positive_value]
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [symbol, trade_date]
+
+  - name: mart_market_overview
+    description: Market cap total, dominancia BTC y concentración top-10 por día.
+    columns:
+      - name: snapshot_date
+        data_tests: [not_null, unique]
+      - name: btc_dominance
+        data_tests: [not_null]

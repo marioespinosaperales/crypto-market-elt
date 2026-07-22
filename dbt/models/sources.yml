@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw layer cargado desde Parquet por el pipeline de ingesta.
+    schema: raw
+    tables:
+      - name: coingecko_markets
+        description: Snapshot diario del top-N por market cap (una fila por moneda y día).
+      - name: binance_klines
+        description: Velas OHLCV diarias cerradas por símbolo.

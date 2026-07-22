@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_coingecko_markets
+    description: Snapshot diario de mercado, deduplicado por (coin_id, snapshot_date).
+    columns:
+      - name: coin_id
+        data_tests: [not_null]
+      - name: price_usd
+        data_tests:
+          - not_null
+          - positive_value
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [coin_id, snapshot_date]
+
+  - name: stg_binance_klines
+    description: Velas OHLCV cerradas, deduplicadas por (symbol, open_time).
+    columns:
+      - name: symbol
+        data_tests: [not_null]
+      - name: close
+        data_tests:
+          - not_null
+          - positive_value
+    data_tests:
+      - unique_combination:
+          arguments:
+            combination: [symbol, open_time]

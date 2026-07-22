@@ -1,0 +1,80 @@
+name: Refresh data
+
+# Corre el pipeline cada hora y publica el snapshot en la rama `data`
+# (force-push de un solo commit: main se mantiene limpia y el repo no crece).
+# Vercel construye el dashboard desde esa rama vía deploy hook.
+
+on:
+  schedule:
+    - cron: "5 * * * *" # cada hora (minuto 5: los runners al minuto 0 se retrasan)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore previous snapshot from data branch
+        run: |
+          git fetch origin data || true
+          if git rev-parse --verify origin/data >/dev/null 2>&1; then
+            git restore --source origin/data -- dashboard/sources/crypto/crypto_marts.duckdb || true
+          fi
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Run pipeline (extract + validate + load)
+        run: uv run python -m crypto_market_elt.run
+
+      - name: Transform (dbt build + tests)
+        run: uv run dbt build --project-dir dbt --profiles-dir dbt
+
+      - name: Export marts snapshot (merges previous history)
+        run: uv run python -m crypto_market_elt.export_snapshot
+
+      - name: Publish snapshot to data branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B data
+          git add -f dashboard/sources/crypto/crypto_marts.duckdb
+          git commit -m "chore: refresh marts snapshot"
+          git push --force origin data
+
+      - name: Trigger Vercel rebuild
+        run: curl -sf -X POST "$VERCEL_DEPLOY_HOOK_URL" > /dev/null
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+
+      - name: Telegram notification
+        run: |
+          curl -sf -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            -d text="✅ crypto-market-elt: dashboard actualizado ($(date -u +'%Y-%m-%d %H:%M UTC'))" \
+            > /dev/null
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Telegram alert on failure
+        if: failure()
+        run: |
+          curl -sf -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            -d text="❌ crypto-market-elt: falló el refresh — ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            > /dev/null
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

@@ -1,0 +1,4 @@
+name: crypto
+type: duckdb
+options:
+  filename: crypto_marts.duckdb

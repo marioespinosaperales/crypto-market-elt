@@ -1,0 +1,9 @@
+crypto_market_elt:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      # Override con ELT_DUCKDB_PATH (Dagster lo fija en absoluto); el default
+      # asume que dbt se ejecuta desde la raíz del repo (make transform).
+      path: "{{ env_var('ELT_DUCKDB_PATH', 'warehouse/crypto.duckdb') }}"
+      threads: 4

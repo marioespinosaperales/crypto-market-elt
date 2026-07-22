@@ -1,0 +1,33 @@
+---
+description: Convenciones de crypto-market-elt (estructura, estilo, dbt, config)
+alwaysApply: true
+---
+
+# crypto-market-elt
+
+ELT: CoinGecko + Binance → Parquet raw (particiones Hive) → DuckDB → dbt → marts. Orquestado con Dagster.
+
+## Estilo Python
+
+- Python 3.12, type hints en firmas públicas, funciones sobre clases.
+- Docstrings breves que expliquen el "por qué", no el "qué".
+- Lint: `uv run ruff check .` debe pasar limpio antes de cualquier commit.
+- NO usar `from __future__ import annotations` en `orchestration/` (Dagster valida anotaciones en runtime).
+
+## Patrones obligatorios
+
+- Parámetro nuevo → YAML en `config/` + modelo pydantic en `settings.py`. Nunca hardcodear.
+- Fuente nueva → módulo en `extract/` + schema pandera en `validate/` + contrato JSON en `schemas/` + fixture real en `tests/fixtures/` + source en `dbt/models/sources.yml`.
+- Validar SIEMPRE antes de escribir al raw layer.
+- Transformaciones de negocio → dbt, no pandas. Python solo extrae, valida y carga.
+
+## dbt
+
+- `stg_*` = views en staging (limpiar, castear, deduplicar con row_number por ingested_date desc).
+- `mart_*` = tables en marts (métricas de negocio).
+- Todo modelo lleva tests en schema.yml (mínimo not_null + unicidad de la clave natural, con `arguments:` para tests genéricos custom).
+
+## Tests
+
+- Mock HTTP con respx, fixtures de respuestas reales en `tests/fixtures/`.
+- Correr con `uv run pytest`.
