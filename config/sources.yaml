@@ -8,7 +8,9 @@ coingecko:
   backoff_seconds: 2.0  # backoff exponencial: 2, 4, 8...
 
 binance:
-  base_url: https://api.binance.com
+  # data-api.binance.vision: espejo oficial de datos públicos de mercado,
+  # sin geo-bloqueo (api.binance.com devuelve 451 desde runners de GitHub en EE.UU.)
+  base_url: https://data-api.binance.vision
   interval: 1d
   lookback_days: 365
   timeout_seconds: 30
