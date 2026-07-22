@@ -1,15 +1,15 @@
-# Parámetros de las fuentes de datos. Secretos NUNCA aquí: van en .env / env vars.
+# Source parameters. Secrets NEVER go here: use .env / env vars.
 coingecko:
   base_url: https://api.coingecko.com/api/v3
   vs_currency: usd
-  top_n: 100            # top N monedas por market cap
+  top_n: 100            # top N coins by market cap
   timeout_seconds: 30
   max_retries: 3
-  backoff_seconds: 2.0  # backoff exponencial: 2, 4, 8...
+  backoff_seconds: 2.0  # exponential backoff: 2, 4, 8...
 
 binance:
-  # data-api.binance.vision: espejo oficial de datos públicos de mercado,
-  # sin geo-bloqueo (api.binance.com devuelve 451 desde runners de GitHub en EE.UU.)
+  # data-api.binance.vision: official public market-data mirror,
+  # no geo-block (api.binance.com returns 451 from US GitHub runners)
   base_url: https://data-api.binance.vision
   interval: 1d
   lookback_days: 365

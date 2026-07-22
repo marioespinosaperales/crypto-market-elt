@@ -1,4 +1,4 @@
--- Métricas diarias por símbolo: retorno, volatilidad rolling (7d/30d) y volumen.
+-- Daily metrics per symbol: return, rolling volatility (7d/30d), and volume.
 with daily as (
     select
         symbol,

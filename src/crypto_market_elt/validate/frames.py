@@ -1,8 +1,8 @@
-"""Validación en ingesta: los datos se validan ANTES de cargarse al raw layer.
+"""Ingestion-time validation: data is validated BEFORE landing in the raw layer.
 
-Detectar basura aquí es más barato que descubrirla en el warehouse.
-Los contratos legibles por humanos viven en ``schemas/``; estos son su
-implementación ejecutable.
+Catching bad data here is cheaper than discovering it in the warehouse.
+Human-readable contracts live in ``schemas/``; these schemas are their
+executable implementation.
 """
 
 from __future__ import annotations
@@ -50,7 +50,7 @@ binance_klines_schema = pa.DataFrameSchema(
         pa.Check(lambda df: (df["high"] >= df["low"]).all(), error="high < low"),
         pa.Check(
             lambda df: ~df.duplicated(subset=["symbol", "open_time_ms"]).any(),
-            error="velas duplicadas para (symbol, open_time)",
+            error="duplicate candles for (symbol, open_time)",
         ),
     ],
 )

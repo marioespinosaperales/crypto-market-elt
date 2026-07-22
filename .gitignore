@@ -6,13 +6,13 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
-# Data & warehouse: NUNCA se commitean (viven en object storage / DuckDB local)
+# Data & warehouse: NEVER commit (live in object storage / local DuckDB)
 data/
 warehouse/
 logs/
 *.duckdb
 *.duckdb.wal
-# Única excepción: snapshot de marts que Evidence necesita en build time (Vercel)
+# Sole exception: marts snapshot Evidence needs at build time (Vercel)
 !dashboard/sources/crypto/crypto_marts.duckdb
 
 # dbt

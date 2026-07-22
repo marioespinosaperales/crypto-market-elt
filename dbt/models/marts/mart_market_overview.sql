@@ -1,5 +1,5 @@
--- Vista macro del mercado por día de snapshot: market cap total, dominancia BTC
--- y concentración del top 10.
+-- Market-wide view per snapshot day: total market cap, BTC dominance,
+-- and top-10 concentration.
 with snapshot as (
     select
         snapshot_date,

@@ -1,4 +1,4 @@
-"""Carga del raw layer (Parquet) a DuckDB, donde dbt hace la T del ELT."""
+"""Load the raw layer (Parquet) into DuckDB, where dbt runs the T in ELT."""
 
 from __future__ import annotations
 
@@ -18,10 +18,10 @@ def load_raw_tables(
     raw_schema: str = "raw",
     datasets: tuple[str, ...] = DATASETS,
 ) -> dict[str, int]:
-    """(Re)crea una tabla raw por dataset leyendo TODAS sus particiones Parquet.
+    """(Re)create one raw table per dataset by reading ALL of its Parquet partitions.
 
-    ``ingested_date`` se deriva del path (partición Hive), de modo que dbt puede
-    quedarse con el snapshot más reciente por clave natural.
+    ``ingested_date`` is derived from the path (Hive partition), so dbt can keep
+    the latest snapshot per natural key.
     """
     duckdb_path.parent.mkdir(parents=True, exist_ok=True)
     row_counts: dict[str, int] = {}
@@ -31,7 +31,7 @@ def load_raw_tables(
         for dataset in datasets:
             glob = (data_dir / dataset / "*" / "*.parquet").as_posix()
             if not list(data_dir.glob(f"{dataset}/*/*.parquet")):
-                logger.warning("Sin particiones para %s, se omite", dataset)
+                logger.warning("No partitions for %s, skipping", dataset)
                 continue
             conn.execute(
                 f"""
@@ -41,6 +41,6 @@ def load_raw_tables(
             )
             count = conn.execute(f"SELECT count(*) FROM {raw_schema}.{dataset}").fetchone()[0]
             row_counts[dataset] = count
-            logger.info("%s.%s: %d filas", raw_schema, dataset, count)
+            logger.info("%s.%s: %d rows", raw_schema, dataset, count)
 
     return row_counts

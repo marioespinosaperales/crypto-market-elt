@@ -1,4 +1,4 @@
-"""Extracción de velas OHLCV diarias desde la API pública de Binance (/api/v3/klines)."""
+"""Extract daily OHLCV candles from the public Binance API (/api/v3/klines)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import pandas as pd
 from crypto_market_elt.extract.http import get_json
 from crypto_market_elt.settings import BinanceConfig
 
-# La API devuelve arrays posicionales; este es el contrato posicional documentado.
+# The API returns positional arrays; this is the documented positional contract.
 _KLINE_FIELDS = [
     "open_time_ms",
     "open",
@@ -36,7 +36,7 @@ _NUMERIC_FIELDS = [
 
 
 def fetch_binance_klines(config: BinanceConfig, symbol: str) -> pd.DataFrame:
-    """Velas OHLCV de un símbolo. Una fila por vela cerrada."""
+    """OHLCV candles for one symbol. One row per closed candle."""
     payload = get_json(
         config,
         "/api/v3/klines",
@@ -53,6 +53,6 @@ def fetch_binance_klines(config: BinanceConfig, symbol: str) -> pd.DataFrame:
     frame["open_time"] = pd.to_datetime(frame["open_time_ms"], unit="ms", utc=True)
     frame["symbol"] = symbol
     frame["interval"] = config.interval
-    # La última vela puede estar aún abierta: se descarta para no cargar datos parciales.
+    # The latest candle may still be open: drop it so we never land partial data.
     now_ms = pd.Timestamp.now(tz="UTC").value // 1_000_000
     return frame[frame["close_time_ms"] <= now_ms].reset_index(drop=True)

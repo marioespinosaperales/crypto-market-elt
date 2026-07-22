@@ -1,12 +1,12 @@
-"""Exporta un snapshot de los marts al dashboard de Evidence.
+"""Export a marts snapshot for the Evidence dashboard.
 
-Copia las tablas mart del warehouse a un DuckDB pequeño en
-``dashboard/sources/crypto/`` — Evidence lo necesita en build time (Vercel).
+Copies mart tables from the warehouse into a small DuckDB file under
+``dashboard/sources/crypto/`` — Evidence needs it at build time (Vercel).
 
-Si ya existe un snapshot previo (en CI viene de la rama ``data``), se fusiona:
-los datos frescos del warehouse ganan y las filas históricas que el warehouse
-ya no tiene (días previos de CoinGecko, velas fuera de la ventana de lookback)
-se conservan. Así la historia acumula entre corridas de runners efímeros.
+If a previous snapshot already exists (in CI it comes from the ``data`` branch),
+it is merged: fresh warehouse rows win, and historical rows the warehouse no
+longer holds (prior CoinGecko days, candles outside the lookback window) are
+kept. That way history accumulates across ephemeral runners.
 
     uv run python -m crypto_market_elt.export_snapshot
 """
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 SNAPSHOT_PATH = PROJECT_ROOT / "dashboard" / "sources" / "crypto" / "crypto_marts.duckdb"
 MARTS_SCHEMA = "main_marts"
-# Tabla mart -> clave natural usada para no duplicar filas al fusionar.
+# Mart table -> natural key used to avoid duplicates when merging.
 MART_KEYS = {
     "mart_daily_ohlcv": ("symbol", "trade_date"),
     "mart_market_overview": ("snapshot_date",),
@@ -65,7 +65,7 @@ def export_snapshot() -> dict[str, int]:
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    logger.info("Snapshot exportado a %s: %s", SNAPSHOT_PATH, export_snapshot())
+    logger.info("Snapshot exported to %s: %s", SNAPSHOT_PATH, export_snapshot())
 
 
 if __name__ == "__main__":

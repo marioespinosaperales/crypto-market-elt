@@ -17,7 +17,7 @@ def test_fetch_coingecko_markets(coingecko_config, coingecko_payload):
 
     assert len(frame) == 2
     assert set(frame["coin_id"]) == {"bitcoin", "ethereum"}
-    # El contrato raw se cumple tal cual sale del extractor
+    # The raw contract holds as soon as data leaves the extractor
     validate_coingecko_markets(frame)
 
 
@@ -36,7 +36,7 @@ def test_fetch_binance_klines(binance_config, binance_payload):
 
 @respx.mock
 def test_fetch_binance_klines_drops_open_candle(binance_config, binance_payload):
-    # La última vela cierra en el futuro -> aún abierta -> debe descartarse
+    # Latest candle closes in the future -> still open -> must be dropped
     future_ms = int(time.time() * 1000) + 86_400_000
     open_candle = list(binance_payload[-1])
     open_candle[0] = future_ms - 86_399_999

@@ -1,28 +1,28 @@
-# crypto-market-elt — Convenciones del proyecto
+# crypto-market-elt — Project conventions
 
 ELT pipeline: CoinGecko + Binance REST → Parquet (raw) → DuckDB → dbt → marts.
 
-## Arquitectura
+## Architecture
 
-- `src/crypto_market_elt/extract/` — clientes HTTP de las fuentes. Un módulo por fuente.
-- `src/crypto_market_elt/validate/` — schemas pandera. TODO dato se valida ANTES de escribirse al raw layer.
-- `src/crypto_market_elt/load/` — escritura Parquet (particiones Hive por `ingested_date`) y carga a DuckDB.
-- `dbt/` — TODA la transformación vive aquí (patrón ELT). Nunca transformar en Python lo que dbt puede hacer.
-- `orchestration/definitions.py` — assets de Dagster. Los assets de carga usan keys `raw/<tabla>` para conectar con las sources de dbt.
-- `config/` — parámetros declarativos (endpoints, símbolos, límites). Secretos SOLO por env vars con prefijo `ELT_`.
-- `schemas/` — contratos de datos legibles por humanos; su implementación ejecutable son los schemas pandera.
+- `src/crypto_market_elt/extract/` — HTTP clients for each source. One module per source.
+- `src/crypto_market_elt/validate/` — pandera schemas. EVERY row is validated BEFORE writing to the raw layer.
+- `src/crypto_market_elt/load/` — Parquet writer (Hive partitions by `ingested_date`) and DuckDB loader.
+- `dbt/` — ALL transformation lives here (ELT pattern). Never transform in Python what dbt can do.
+- `orchestration/definitions.py` — Dagster assets. Load assets use keys `raw/<table>` to wire into dbt sources.
+- `config/` — declarative parameters (endpoints, symbols, limits). Secrets ONLY via env vars with the `ELT_` prefix.
+- `schemas/` — human-readable data contracts; their executable implementation is the pandera schemas.
 
-## Reglas
+## Rules
 
-- Python 3.12, type hints en todas las firmas públicas, sin clases donde una función basta.
-- Configuración nueva: agregar al YAML en `config/` + modelo pydantic en `settings.py`. Nunca hardcodear params.
-- dbt: naming `stg_` (staging, views) / `mart_` (marts, tables). Todo modelo nuevo lleva tests en su `schema.yml`.
-- Los datos y logs NUNCA se commitean (`data/`, `warehouse/`, `logs/` están en .gitignore).
-- Tests con fixtures de respuestas reales de las APIs (en `tests/fixtures/`), mocking HTTP con respx.
-- NO usar `from __future__ import annotations` en archivos con assets de Dagster (rompe la validación de anotaciones de contexto).
+- Python 3.12, type hints on every public signature, no classes where a function will do.
+- New config: add it to YAML under `config/` + a pydantic model in `settings.py`. Never hardcode params.
+- dbt: naming `stg_` (staging, views) / `mart_` (marts, tables). Every new model gets tests in its `schema.yml`.
+- Data and logs are NEVER committed (`data/`, `warehouse/`, `logs/` are gitignored).
+- Tests use fixtures of real API responses (in `tests/fixtures/`), with HTTP mocked via respx.
+- Do NOT use `from __future__ import annotations` in files with Dagster assets (breaks runtime annotation validation).
 
-## Comandos
+## Commands
 
-- `make pipeline` (o `uv run python -m crypto_market_elt.run` + `uv run dbt build --project-dir dbt --profiles-dir dbt`)
-- `make dev` — UI de Dagster
-- `make lint && make test` — obligatorio antes de commit
+- `make pipeline` (or `uv run python -m crypto_market_elt.run` + `uv run dbt build --project-dir dbt --profiles-dir dbt`)
+- `make dev` — Dagster UI
+- `make lint && make test` — required before every commit

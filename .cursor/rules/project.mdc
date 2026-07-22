@@ -1,33 +1,33 @@
 ---
-description: Convenciones de crypto-market-elt (estructura, estilo, dbt, config)
+description: crypto-market-elt conventions (structure, style, dbt, config)
 alwaysApply: true
 ---
 
 # crypto-market-elt
 
-ELT: CoinGecko + Binance → Parquet raw (particiones Hive) → DuckDB → dbt → marts. Orquestado con Dagster.
+ELT: CoinGecko + Binance → Parquet raw (Hive partitions) → DuckDB → dbt → marts. Orchestrated with Dagster.
 
-## Estilo Python
+## Python style
 
-- Python 3.12, type hints en firmas públicas, funciones sobre clases.
-- Docstrings breves que expliquen el "por qué", no el "qué".
-- Lint: `uv run ruff check .` debe pasar limpio antes de cualquier commit.
-- NO usar `from __future__ import annotations` en `orchestration/` (Dagster valida anotaciones en runtime).
+- Python 3.12, type hints on public signatures, functions over classes.
+- Short docstrings that explain the "why", not the "what".
+- Lint: `uv run ruff check .` must pass clean before any commit.
+- Do NOT use `from __future__ import annotations` in `orchestration/` (Dagster validates annotations at runtime).
 
-## Patrones obligatorios
+## Mandatory patterns
 
-- Parámetro nuevo → YAML en `config/` + modelo pydantic en `settings.py`. Nunca hardcodear.
-- Fuente nueva → módulo en `extract/` + schema pandera en `validate/` + contrato JSON en `schemas/` + fixture real en `tests/fixtures/` + source en `dbt/models/sources.yml`.
-- Validar SIEMPRE antes de escribir al raw layer.
-- Transformaciones de negocio → dbt, no pandas. Python solo extrae, valida y carga.
+- New parameter → YAML in `config/` + pydantic model in `settings.py`. Never hardcode.
+- New source → module in `extract/` + pandera schema in `validate/` + JSON contract in `schemas/` + real fixture in `tests/fixtures/` + source in `dbt/models/sources.yml`.
+- ALWAYS validate before writing to the raw layer.
+- Business transforms → dbt, not pandas. Python only extracts, validates, and loads.
 
 ## dbt
 
-- `stg_*` = views en staging (limpiar, castear, deduplicar con row_number por ingested_date desc).
-- `mart_*` = tables en marts (métricas de negocio).
-- Todo modelo lleva tests en schema.yml (mínimo not_null + unicidad de la clave natural, con `arguments:` para tests genéricos custom).
+- `stg_*` = staging views (clean, cast, dedupe with row_number ordered by ingested_date desc).
+- `mart_*` = mart tables (business metrics).
+- Every model has tests in schema.yml (at least not_null + natural-key uniqueness, with `arguments:` for custom generic tests).
 
 ## Tests
 
-- Mock HTTP con respx, fixtures de respuestas reales en `tests/fixtures/`.
-- Correr con `uv run pytest`.
+- Mock HTTP with respx, real response fixtures in `tests/fixtures/`.
+- Run with `uv run pytest`.

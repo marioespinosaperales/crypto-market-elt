@@ -1,12 +1,12 @@
 name: Refresh data
 
-# Corre el pipeline cada hora y publica el snapshot en la rama `data`
-# (force-push de un solo commit: main se mantiene limpia y el repo no crece).
-# Vercel construye el dashboard desde esa rama vía deploy hook.
+# Runs the pipeline hourly and publishes the snapshot to the `data` branch
+# (force-push of a single commit: main stays clean and the repo does not grow).
+# Vercel rebuilds the dashboard from that branch via deploy hook.
 
 on:
   schedule:
-    - cron: "5 * * * *" # cada hora (minuto 5: los runners al minuto 0 se retrasan)
+    - cron: "5 * * * *" # hourly (minute 5: runners queue up at minute 0)
   workflow_dispatch:
 
 permissions:
@@ -56,7 +56,7 @@ jobs:
       - name: Trigger Vercel rebuild
         run: |
           if [ -z "$VERCEL_DEPLOY_HOOK_URL" ]; then
-            echo "VERCEL_DEPLOY_HOOK_URL no configurado; se omite."
+            echo "VERCEL_DEPLOY_HOOK_URL not set; skipping."
             exit 0
           fi
           curl -sf -X POST "$VERCEL_DEPLOY_HOOK_URL" > /dev/null
@@ -66,12 +66,12 @@ jobs:
       - name: Telegram notification
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
-            echo "TELEGRAM_BOT_TOKEN no configurado; se omite."
+            echo "TELEGRAM_BOT_TOKEN not set; skipping."
             exit 0
           fi
           curl -sf -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d chat_id="${TELEGRAM_CHAT_ID}" \
-            -d text="✅ crypto-market-elt: dashboard actualizado ($(date -u +'%Y-%m-%d %H:%M UTC'))" \
+            -d text="✅ crypto-market-elt: dashboard updated ($(date -u +'%Y-%m-%d %H:%M UTC'))" \
             > /dev/null
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -81,12 +81,12 @@ jobs:
         if: failure()
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
-            echo "TELEGRAM_BOT_TOKEN no configurado; se omite."
+            echo "TELEGRAM_BOT_TOKEN not set; skipping."
             exit 0
           fi
           curl -sf -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d chat_id="${TELEGRAM_CHAT_ID}" \
-            -d text="❌ crypto-market-elt: falló el refresh — ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            -d text="❌ crypto-market-elt: refresh failed — ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             > /dev/null
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}

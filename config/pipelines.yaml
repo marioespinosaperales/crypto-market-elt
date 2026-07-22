@@ -1,4 +1,4 @@
-# Parámetros del pipeline (rutas, warehouse). Overridable por env vars con prefijo ELT_.
-data_dir: ./data                        # raw layer local; en prod apunta a un bucket montado
-duckdb_path: ./warehouse/crypto.duckdb  # warehouse embebido
-raw_schema: raw                         # schema de DuckDB donde aterrizan los datos crudos
+# Pipeline parameters (paths, warehouse). Overridable via ELT_ env vars.
+data_dir: ./data                        # local raw layer; in prod point at a mounted bucket
+duckdb_path: ./warehouse/crypto.duckdb  # embedded warehouse
+raw_schema: raw                         # DuckDB schema where raw data lands

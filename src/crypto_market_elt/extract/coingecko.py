@@ -1,4 +1,4 @@
-"""Extracción del snapshot diario de mercado desde CoinGecko (/coins/markets)."""
+"""Extract the daily market snapshot from CoinGecko (/coins/markets)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import pandas as pd
 from crypto_market_elt.extract.http import get_json
 from crypto_market_elt.settings import CoinGeckoConfig
 
-# Columnas del contrato raw (ver schemas/raw_coingecko_markets.json)
+# Raw contract columns (see schemas/raw_coingecko_markets.json)
 _COLUMNS = [
     "id",
     "symbol",
@@ -29,7 +29,7 @@ def fetch_coingecko_markets(
     api_key: str | None = None,
     snapshot_date: dt.date | None = None,
 ) -> pd.DataFrame:
-    """Snapshot del top-N por market cap. Una fila por moneda."""
+    """Top-N market-cap snapshot. One row per coin."""
     headers = {"x-cg-demo-api-key": api_key} if api_key else None
     payload = get_json(
         config,

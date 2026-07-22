@@ -1,5 +1,5 @@
--- Velas OHLCV limpias y deduplicadas por (symbol, open_time): gana la ingesta
--- más reciente. Solo llegan velas cerradas (el extractor descarta la abierta).
+-- Clean OHLCV candles, deduplicated by (symbol, open_time): latest ingestion wins.
+-- Only closed candles land here (the extractor drops the open one).
 with ranked as (
     select
         symbol,

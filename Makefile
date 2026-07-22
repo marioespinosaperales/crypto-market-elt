@@ -1,5 +1,5 @@
-# Requiere make (en Windows: incluido en Git Bash, o `winget install GnuWin32.Make`).
-# Equivalentes PowerShell documentados en el README.
+# Requires make (on Windows: included with Git Bash, or `winget install GnuWin32.Make`).
+# PowerShell equivalents are documented in the README.
 
 .PHONY: install lint test ingest transform pipeline snapshot dev
 

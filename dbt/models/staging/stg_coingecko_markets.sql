@@ -1,5 +1,5 @@
--- Snapshot limpio y deduplicado: si un mismo (coin_id, snapshot_date) se ingirió
--- varias veces, gana la ingesta más reciente.
+-- Clean, deduplicated snapshot: if the same (coin_id, snapshot_date) was
+-- ingested more than once, the latest ingestion wins.
 with ranked as (
     select
         coin_id,

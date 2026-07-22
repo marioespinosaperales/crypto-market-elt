@@ -23,5 +23,5 @@ jobs:
       - name: Unit tests
         run: uv run pytest
 
-      - name: dbt compile (valida modelos sin datos)
+      - name: dbt compile (validates models without data)
         run: uv run dbt parse --project-dir dbt --profiles-dir dbt

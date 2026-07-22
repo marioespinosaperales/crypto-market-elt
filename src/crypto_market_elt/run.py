@@ -1,7 +1,7 @@
-"""Entrypoint de ingesta: extract -> validate -> load (raw layer + DuckDB).
+"""Ingestion entrypoint: extract -> validate -> load (raw layer + DuckDB).
 
-La T del ELT vive en dbt (``make transform``). Dagster orquesta ambos pasos
-en producción; este módulo permite correr la ingesta a mano:
+The T in ELT lives in dbt (``make transform``). Dagster orchestrates both steps
+in production; this module lets you run ingestion by hand:
 
     uv run python -m crypto_market_elt.run
 """
@@ -56,8 +56,8 @@ def load_warehouse() -> dict[str, int]:
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    logger.info("CoinGecko: %d filas", ingest_coingecko())
-    logger.info("Binance: %d filas", ingest_binance())
+    logger.info("CoinGecko: %d rows", ingest_coingecko())
+    logger.info("Binance: %d rows", ingest_binance())
     logger.info("Warehouse: %s", load_warehouse())
 
 

@@ -1,8 +1,8 @@
-"""Carga y validación de la configuración del proyecto.
+"""Load and validate project configuration.
 
-Toda la configuración declarativa vive en ``config/*.yaml`` y se valida aquí
-con pydantic al arranque. Los secretos (API keys) SOLO entran por variables
-de entorno (prefijo ``ELT_``), nunca por YAML.
+Declarative config lives in ``config/*.yaml`` and is validated here with pydantic
+at startup. Secrets (API keys) enter ONLY via environment variables
+(``ELT_`` prefix), never via YAML.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ CONFIG_DIR = PROJECT_ROOT / "config"
 
 
 class HttpSourceConfig(BaseModel):
-    """Parámetros comunes a cualquier fuente HTTP."""
+    """Shared parameters for any HTTP source."""
 
     base_url: str
     timeout_seconds: float = 30.0
@@ -49,7 +49,7 @@ class PipelineConfig(BaseModel):
     raw_schema: str = "raw"
 
     def resolve(self, root: Path) -> PipelineConfig:
-        """Convierte rutas relativas en absolutas respecto a la raíz del repo."""
+        """Turn relative paths into absolute paths rooted at the repo."""
         return self.model_copy(
             update={
                 "data_dir": (root / self.data_dir).resolve(),
@@ -59,7 +59,7 @@ class PipelineConfig(BaseModel):
 
 
 class Secrets(BaseSettings):
-    """Secretos y overrides por entorno. Ejemplo: ELT_COINGECKO_API_KEY=..."""
+    """Secrets and env overrides. Example: ELT_COINGECKO_API_KEY=..."""
 
     model_config = SettingsConfigDict(env_prefix="ELT_", env_file=".env", extra="ignore")
 

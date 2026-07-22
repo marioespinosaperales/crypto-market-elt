@@ -1,6 +1,6 @@
-"""Definiciones de Dagster: assets de ingesta + assets de dbt + schedule diario.
+"""Dagster definitions: ingestion assets + dbt assets + daily schedule.
 
-Levantar la UI local:
+Start the local UI with:
 
     uv run dagster dev -f orchestration/definitions.py
 """
@@ -18,7 +18,7 @@ from crypto_market_elt.validate import validate_binance_klines, validate_coingec
 
 settings = get_settings()
 
-# dbt resuelve la ruta del warehouse por env var (ver dbt/profiles.yml).
+# dbt resolves the warehouse path via env var (see dbt/profiles.yml).
 os.environ.setdefault("ELT_DUCKDB_PATH", str(settings.pipeline.duckdb_path))
 
 dbt_project = DbtProject(
@@ -28,7 +28,7 @@ dbt_project = DbtProject(
 dbt_project.prepare_if_dev()
 
 
-@dg.asset(group_name="ingestion", description="Snapshot top-N de CoinGecko a Parquet (raw).")
+@dg.asset(group_name="ingestion", description="CoinGecko top-N snapshot to Parquet (raw).")
 def coingecko_markets_parquet(context: AssetExecutionContext) -> None:
     frame = fetch_coingecko_markets(
         settings.sources.coingecko, api_key=settings.secrets.coingecko_api_key
@@ -38,7 +38,7 @@ def coingecko_markets_parquet(context: AssetExecutionContext) -> None:
     context.add_output_metadata({"rows": len(frame)})
 
 
-@dg.asset(group_name="ingestion", description="Velas OHLCV de Binance a Parquet (raw).")
+@dg.asset(group_name="ingestion", description="Binance OHLCV candles to Parquet (raw).")
 def binance_klines_parquet(context: AssetExecutionContext) -> None:
     config = settings.sources.binance
     total = 0
@@ -62,13 +62,13 @@ def _load_one(dataset: str) -> int:
     return counts.get(dataset, 0)
 
 
-# Las keys ["raw", <tabla>] coinciden con las sources de dbt, así el grafo
-# de dependencias ingesta -> raw -> staging -> marts queda conectado solo.
+# Keys ["raw", <table>] match dbt sources, so the dependency graph
+# ingestion -> raw -> staging -> marts wires up automatically.
 @dg.asset(
     key=["raw", "coingecko_markets"],
     deps=[coingecko_markets_parquet],
     group_name="warehouse",
-    description="Carga particiones Parquet de CoinGecko a DuckDB.",
+    description="Load CoinGecko Parquet partitions into DuckDB.",
 )
 def raw_coingecko_markets(context: AssetExecutionContext) -> None:
     context.add_output_metadata({"rows": _load_one("coingecko_markets")})
@@ -78,7 +78,7 @@ def raw_coingecko_markets(context: AssetExecutionContext) -> None:
     key=["raw", "binance_klines"],
     deps=[binance_klines_parquet],
     group_name="warehouse",
-    description="Carga particiones Parquet de Binance a DuckDB.",
+    description="Load Binance Parquet partitions into DuckDB.",
 )
 def raw_binance_klines(context: AssetExecutionContext) -> None:
     context.add_output_metadata({"rows": _load_one("binance_klines")})
@@ -93,7 +93,7 @@ daily_job = dg.define_asset_job("daily_elt", selection="*")
 
 daily_schedule = dg.ScheduleDefinition(
     job=daily_job,
-    cron_schedule="0 6 * * *",  # 06:00 UTC: después del cierre de la vela diaria
+    cron_schedule="0 6 * * *",  # 06:00 UTC: after the daily candle closes
     default_status=dg.DefaultScheduleStatus.STOPPED,
 )
 
