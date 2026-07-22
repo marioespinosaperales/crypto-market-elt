@@ -3,7 +3,7 @@ title: Crypto Market Overview
 ---
 
 Daily ELT pipeline: CoinGecko + Binance → Parquet → DuckDB → dbt marts → this dashboard.
-Refreshed automatically by GitHub Actions. Source code: [crypto-market-elt](https://github.com/marioespinosaperales/crypto-market-elt).
+Refreshed hourly by GitHub Actions. Source: [crypto-market-elt](https://github.com/marioespinosaperales/crypto-market-elt).
 
 ```sql latest_overview
 select *
@@ -16,7 +16,7 @@ limit 1
   data={latest_overview}
   value=total_market_cap
   title="Total Market Cap (top 100)"
-  fmt='$#,##0.0,,,"B"'
+  fmt=usd
 />
 
 <BigValue
@@ -39,37 +39,50 @@ limit 1
   title="Coins Tracked"
 />
 
-## Market history
+## Price history (Binance, last ~365 days)
 
-One snapshot per pipeline run — these series grow as the scheduled job keeps running.
-
-```sql overview_history
+```sql prices
 select
-    snapshot_date,
-    total_market_cap,
-    btc_dominance,
-    top10_share
-from crypto.market_overview
-order by snapshot_date
+    trade_date,
+    symbol,
+    close
+from crypto.daily_ohlcv
+order by trade_date, symbol
 ```
 
 <LineChart
-  data={overview_history}
-  x=snapshot_date
-  y=total_market_cap
-  title="Total market cap over time"
-  yFmt='$#,##0.0,,,"B"'
+  data={prices}
+  x=trade_date
+  y=close
+  series=symbol
+  title="Daily close by pair"
+  yFmt=usd2
+  handleMissing=connect
 />
+
+## Rolling volatility (30d)
+
+```sql vol
+select
+    trade_date,
+    symbol,
+    volatility_30d
+from crypto.daily_ohlcv
+where volatility_30d is not null
+order by trade_date, symbol
+```
 
 <LineChart
-  data={overview_history}
-  x=snapshot_date
-  y={['btc_dominance', 'top10_share']}
-  title="BTC dominance and top-10 concentration"
-  yFmt=pct0
+  data={vol}
+  x=trade_date
+  y=volatility_30d
+  series=symbol
+  title="30-day rolling volatility of daily returns"
+  yFmt=pct1
+  handleMissing=connect
 />
 
-## Tracked pairs (Binance, daily candles)
+## Tracked pairs
 
 Click a row to drill into that pair.
 
@@ -89,9 +102,9 @@ order by avg_quote_volume_30d desc
 
 <DataTable data={latest_by_symbol} link=symbol_link>
   <Column id=symbol />
-  <Column id=last_close fmt='$#,##0.00' title="Last close" />
+  <Column id=last_close fmt=usd2 title="Last close" />
   <Column id=last_daily_return fmt=pct2 title="Daily return" contentType=delta />
   <Column id=volatility_30d fmt=pct2 title="Volatility (30d)" />
-  <Column id=avg_quote_volume_30d fmt='$#,##0,,"M"' title="Avg volume 30d" />
+  <Column id=avg_quote_volume_30d fmt=usd title="Avg volume 30d" />
   <Column id=last_trade_date title="Last candle" />
 </DataTable>
