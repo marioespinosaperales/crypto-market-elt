@@ -5,7 +5,7 @@ Production-style **ELT pipeline** for crypto market data: extracts daily market 
 Hive-partitioned Parquet, loads them into DuckDB, and transforms them with dbt into
 analytics-ready marts. Orchestrated with Dagster.
 
-**Live dashboard:** see link in the repo description (Evidence.dev on Vercel, refreshed hourly by GitHub Actions).
+**Live dashboard:** [crypto-market-elt on Vercel](https://crypto-market-elt-git-data-marioespinosaperales-projects.vercel.app/) (Evidence.dev, refreshed hourly by GitHub Actions).
 
 ```mermaid
 flowchart LR
