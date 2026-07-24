@@ -1,7 +1,7 @@
 # Requires make (on Windows: included with Git Bash, or `winget install GnuWin32.Make`).
 # PowerShell equivalents are documented in the README.
 
-.PHONY: install lint test ingest transform pipeline snapshot dev
+.PHONY: install lint test ingest transform pipeline snapshot eval dev docker-build docker-pipeline docker-test
 
 install:
 	uv sync
@@ -23,5 +23,17 @@ pipeline: ingest transform
 snapshot:
 	uv run python -m crypto_market_elt.export_snapshot
 
+eval:
+	uv run python -m crypto_market_elt.evals
+
 dev:
 	uv run dagster dev -f orchestration/definitions.py
+
+docker-build:
+	docker compose build
+
+docker-pipeline:
+	docker compose run --rm pipeline
+
+docker-test:
+	docker compose run --rm test
