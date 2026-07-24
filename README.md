@@ -36,6 +36,17 @@ task with a fail-fast quality gate so bad rows never pollute downstream consumer
 | Reliable rubric | Human-readable contracts in `schemas/` + executable pandera schemas |
 | Useful data trajectory | Idempotent Hive Parquet → DuckDB → tested dbt marts |
 | Validation loop | Contract probes + warehouse sanity → `artifacts/qc_scorecard.md` |
+| ML signal | IsolationForest on OHLCV features as second-line QC → `artifacts/ml_anomaly_report.md` |
+
+### ML (second-line QC)
+
+Unsupervised anomaly detection on validated OHLCV (returns, log-volume, range, rolling
+z-scores). Complements pandera contracts — it flags review candidates; it does not
+replace fail-fast ingestion validation.
+
+```bash
+make ml   # → artifacts/ml_anomaly_report.md
+```
 
 Sibling stories: [dex-trades-canonical](https://github.com/marioespinosaperales/dex-trades-canonical) (labeling rubric) and [lp-history-reconstructor](https://github.com/marioespinosaperales/lp-history-reconstructor) (ground-truth eval).
 
@@ -44,6 +55,7 @@ Sibling stories: [dex-trades-canonical](https://github.com/marioespinosaperales/
 - **Data contracts as QC**: human-readable contracts in `schemas/`, enforced at ingestion by pandera — bad data never reaches the warehouse.
 - **ELT pattern**: raw data lands untransformed; business logic lives in dbt (staging → marts), fully tested.
 - **QC scorecard**: `python -m crypto_market_elt.evals` probes pass/fail contract cases and warehouse freshness/row counts.
+- **ML anomaly QC**: `python -m crypto_market_elt.ml` IsolationForest second-line check on OHLCV features.
 - **Idempotency**: re-running a day overwrites its partition; staging deduplicates by natural key.
 - **Config-driven + Docker**: YAML + pydantic (`ELT_` secrets); `Dockerfile` / `docker compose` for a reproducible Linux run.
 - **Orchestration**: Dagster asset graph wires ingestion → load → dbt; GitHub Actions hourly refresh.
@@ -60,7 +72,10 @@ make pipeline
 # 3. QC scorecard (contract probes + warehouse sanity)
 make eval   # → artifacts/qc_scorecard.md
 
-# 4. optional: Dagster UI
+# 4. ML anomaly report (second-line QC)
+make ml     # → artifacts/ml_anomaly_report.md
+
+# 5. optional: Dagster UI
 make dev
 ```
 
@@ -83,6 +98,7 @@ schemas/         data contracts per raw dataset
 src/…/extract/   HTTP clients (retries + exponential backoff)
 src/…/validate/  pandera schemas — ingestion-time validation
 src/…/evals/     QC scorecard CLI (contract probes + warehouse sanity)
+src/…/ml/        IsolationForest OHLCV anomaly report (second-line QC)
 src/…/load/      Parquet writer (Hive partitions) + DuckDB loader
 dbt/             staging views, mart tables, data tests (incl. custom generic tests)
 orchestration/   Dagster assets, daily schedule (06:00 UTC, after daily candle close)
