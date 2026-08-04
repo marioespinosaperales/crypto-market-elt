@@ -36,7 +36,8 @@ task with a fail-fast quality gate so bad rows never pollute downstream consumer
 | Reliable rubric | Human-readable contracts in `schemas/` + executable pandera schemas |
 | Useful data trajectory | Idempotent Hive Parquet → DuckDB → tested dbt marts |
 | Validation loop | Contract probes + warehouse sanity → `artifacts/qc_scorecard.md` |
-| ML signal | IsolationForest on OHLCV features as second-line QC → `artifacts/ml_anomaly_report.md` |
+| ML signal | IsolationForest second-line QC + naive vs ARIMA forecast eval |
+| Research | Hypothesis → holdout metrics → [RESEARCH.md](RESEARCH.md) |
 
 ### ML (second-line QC)
 
@@ -48,6 +49,16 @@ replace fail-fast ingestion validation.
 make ml   # → artifacts/ml_anomaly_report.md
 ```
 
+### Time-series research
+
+Naive vs ARIMA(1,1,1) one-step forecast eval with MAE/RMSE/directional accuracy.
+
+```bash
+make research   # → artifacts/research_timeseries.md
+```
+
+See [RESEARCH.md](RESEARCH.md).
+
 Sibling stories: [dex-trades-canonical](https://github.com/marioespinosaperales/dex-trades-canonical) (labeling rubric) and [lp-history-reconstructor](https://github.com/marioespinosaperales/lp-history-reconstructor) (ground-truth eval).
 
 ## What this demonstrates
@@ -56,6 +67,7 @@ Sibling stories: [dex-trades-canonical](https://github.com/marioespinosaperales/
 - **ELT pattern**: raw data lands untransformed; business logic lives in dbt (staging → marts), fully tested.
 - **QC scorecard**: `python -m crypto_market_elt.evals` probes pass/fail contract cases and warehouse freshness/row counts.
 - **ML anomaly QC**: `python -m crypto_market_elt.ml` IsolationForest second-line check on OHLCV features.
+- **Time-series eval**: `make research` compares naive vs ARIMA holdout forecasts (statsmodels).
 - **Idempotency**: re-running a day overwrites its partition; staging deduplicates by natural key.
 - **Config-driven + Docker**: YAML + pydantic (`ELT_` secrets); `Dockerfile` / `docker compose` for a reproducible Linux run.
 - **Orchestration**: Dagster asset graph wires ingestion → load → dbt; GitHub Actions hourly refresh.
@@ -75,7 +87,10 @@ make eval   # → artifacts/qc_scorecard.md
 # 4. ML anomaly report (second-line QC)
 make ml     # → artifacts/ml_anomaly_report.md
 
-# 5. optional: Dagster UI
+# 5. Time-series research report (naive vs ARIMA)
+make research
+
+# 6. optional: Dagster UI
 make dev
 ```
 

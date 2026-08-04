@@ -8,7 +8,8 @@ Portfolio story: **ingestion contracts + fail-fast QC** (sibling: dex labeling, 
 - `src/crypto_market_elt/extract/` — HTTP clients for each source. One module per source.
 - `src/crypto_market_elt/validate/` — pandera schemas. EVERY row is validated BEFORE writing to the raw layer.
 - `src/crypto_market_elt/evals/` — QC scorecard (contract probes + warehouse sanity).
-- `src/crypto_market_elt/ml/` — IsolationForest OHLCV anomaly report (second-line QC).
+- `src/crypto_market_elt/ml/` — IsolationForest anomaly + ARIMA timeseries research reports.
+- `RESEARCH.md` — naive vs ARIMA atomic study.
 - `src/crypto_market_elt/load/` — Parquet writer (Hive partitions by `ingested_date`) and DuckDB loader.
 - `dbt/` — ALL transformation lives here (ELT pattern). Never transform in Python what dbt can do.
 - `orchestration/definitions.py` — Dagster assets. Load assets use keys `raw/<table>` to wire into dbt sources.
@@ -30,6 +31,7 @@ Portfolio story: **ingestion contracts + fail-fast QC** (sibling: dex labeling, 
 - `make pipeline` (or `uv run python -m crypto_market_elt.run` + `uv run dbt build --project-dir dbt --profiles-dir dbt`)
 - `make eval` — QC scorecard → `artifacts/qc_scorecard.md`
 - `make ml` — anomaly report → `artifacts/ml_anomaly_report.md`
+- `make research` — timeseries report → `artifacts/research_timeseries.md`
 - `make docker-pipeline` / `make docker-test`
 - `make dev` — Dagster UI
 - `make lint && make test` — required before every commit
