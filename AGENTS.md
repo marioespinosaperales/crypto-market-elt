@@ -31,7 +31,7 @@ Portfolio story: **ingestion contracts + fail-fast QC** (sibling: dex labeling, 
 - `make pipeline` (or `uv run python -m crypto_market_elt.run` + `uv run dbt build --project-dir dbt --profiles-dir dbt`)
 - `make eval` — QC scorecard → `artifacts/qc_scorecard.md`
 - `make ml` — anomaly report → `artifacts/ml_anomaly_report.md`
-- `make research` — timeseries report → `artifacts/research_timeseries.md`
+- `make research` — timeseries + event-study → `artifacts/research_*.md`
 - `make docker-pipeline` / `make docker-test`
 - `make dev` — Dagster UI
 - `make lint && make test` — required before every commit

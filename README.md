@@ -49,12 +49,13 @@ replace fail-fast ingestion validation.
 make ml   # → artifacts/ml_anomaly_report.md
 ```
 
-### Time-series research
+### Time-series + event-study research
 
-Naive vs ARIMA(1,1,1) one-step forecast eval with MAE/RMSE/directional accuracy.
+Naive vs ARIMA(1,1,1) one-step forecast eval, plus a quasi-experimental event study
+(pre/post log-return difference-in-means around an injected shock).
 
 ```bash
-make research   # → artifacts/research_timeseries.md
+make research   # → artifacts/research_timeseries.md + research_event_study.md
 ```
 
 See [RESEARCH.md](RESEARCH.md).
@@ -67,7 +68,8 @@ Sibling stories: [dex-trades-canonical](https://github.com/marioespinosaperales/
 - **ELT pattern**: raw data lands untransformed; business logic lives in dbt (staging → marts), fully tested.
 - **QC scorecard**: `python -m crypto_market_elt.evals` probes pass/fail contract cases and warehouse freshness/row counts.
 - **ML anomaly QC**: `python -m crypto_market_elt.ml` IsolationForest second-line check on OHLCV features.
-- **Time-series eval**: `make research` compares naive vs ARIMA holdout forecasts (statsmodels).
+- **Time-series eval**: naive vs ARIMA holdout forecasts (statsmodels).
+- **Event study**: quasi-experimental pre/post return shift around a synthetic shock.
 - **Idempotency**: re-running a day overwrites its partition; staging deduplicates by natural key.
 - **Config-driven + Docker**: YAML + pydantic (`ELT_` secrets); `Dockerfile` / `docker compose` for a reproducible Linux run.
 - **Orchestration**: Dagster asset graph wires ingestion → load → dbt; GitHub Actions hourly refresh.
@@ -87,7 +89,7 @@ make eval   # → artifacts/qc_scorecard.md
 # 4. ML anomaly report (second-line QC)
 make ml     # → artifacts/ml_anomaly_report.md
 
-# 5. Time-series research report (naive vs ARIMA)
+# 5. Research reports (timeseries + event study)
 make research
 
 # 6. optional: Dagster UI

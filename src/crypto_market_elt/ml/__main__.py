@@ -2,6 +2,7 @@
 
 Default: anomaly report.
 ``--timeseries``: naive vs ARIMA research report.
+``--event-study``: quasi-experimental event-study report.
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ import sys
 from pathlib import Path
 
 from crypto_market_elt.ml.anomaly import build_report, score_ohlcv, write_report
+from crypto_market_elt.ml.event_study import build_event_study_report, write_event_study_report
 from crypto_market_elt.ml.features import load_binance_klines, synthesize_ohlcv
 from crypto_market_elt.ml.timeseries import build_timeseries_report, write_timeseries_report
 from crypto_market_elt.settings import PROJECT_ROOT
@@ -31,11 +33,29 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Write naive vs ARIMA forecast eval report",
     )
+    parser.add_argument(
+        "--event-study",
+        action="store_true",
+        help="Write quasi-experimental event-study report",
+    )
     args = parser.parse_args(argv)
 
     if not args.fixture.exists():
         logger.error("Fixture not found: %s", args.fixture)
         return 1
+
+    if args.event_study:
+        report = build_event_study_report(fixture=args.fixture, seed=args.seed)
+        path = write_event_study_report(report)
+        ev = report["evidence"]
+        logger.info(
+            "Wrote event-study report → %s (diff=%.6f p=%.4f)",
+            path,
+            ev["diff_event_minus_pre"],
+            ev["bootstrap_p_event_vs_pre"],
+        )
+        print(path)
+        return 0
 
     if args.timeseries:
         report = build_timeseries_report(fixture=args.fixture, seed=args.seed)

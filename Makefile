@@ -31,6 +31,7 @@ ml:
 
 research:
 	uv run python -m crypto_market_elt.ml --timeseries
+	uv run python -m crypto_market_elt.ml --event-study
 
 dev:
 	uv run dagster dev -f orchestration/definitions.py
