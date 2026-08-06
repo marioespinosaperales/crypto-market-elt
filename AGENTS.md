@@ -17,6 +17,12 @@ Portfolio story: **ingestion contracts + fail-fast QC** (sibling: dex labeling, 
 - `schemas/` — human-readable data contracts; their executable implementation is the pandera schemas.
 - `Dockerfile` / `docker-compose.yml` — reproducible Linux pipeline + scorecard.
 
+## Git commits
+
+- NEVER add `Co-authored-by: Cursor <cursoragent@cursor.com>`, `Made-with: Cursor`, or any Cursor/AI attribution trailer to commits or PRs.
+- Commit messages must be authored only as the human repo owner (no Cursor co-author lines).
+- Do not pass `--trailer` for Cursor attribution when committing.
+
 ## Rules
 
 - Python 3.12, type hints on every public signature, no classes where a function will do.

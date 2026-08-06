@@ -31,3 +31,8 @@ ELT: CoinGecko + Binance → Parquet raw (Hive partitions) → DuckDB → dbt �
 
 - Mock HTTP with respx, real response fixtures in `tests/fixtures/`.
 - Run with `uv run pytest`.
+
+## Git commits
+
+- NEVER add `Co-authored-by: Cursor <cursoragent@cursor.com>`, `Made-with: Cursor`, or any Cursor attribution trailer.
+- Do not use `--trailer` for Cursor co-authors.
